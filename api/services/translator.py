@@ -70,6 +70,9 @@ class TranslationService:
         import sys
         from book_maker.cli import main as translate_book
         
+        # 获取 book_id（从文件名中）
+        book_id = os.path.splitext(os.path.basename(input_path))[0]
+        
         # 构建命令行参数
         sys.argv = [
             'book_maker',
@@ -84,7 +87,6 @@ class TranslationService:
         
         try:
             logger.debug(f"Starting translation for {input_path}")
-            # 执行翻译
             await asyncio.to_thread(translate_book)
             
             # 获取预期的输出文件路径（在输入文件同目录下）
@@ -93,7 +95,7 @@ class TranslationService:
             
             logger.debug(f"Checking for output file at: {source_path}")
             if os.path.exists(source_path):
-                target_path = os.path.join(self.translated_dir, f"{os.path.basename(input_path)}_bilingual.epub")
+                target_path = os.path.join(self.translated_dir, f"{book_id}_bilingual.epub")
                 os.rename(source_path, target_path)
                 logger.debug(f"Successfully moved output file to: {target_path}")
             else:
@@ -104,7 +106,7 @@ class TranslationService:
             name, _ = os.path.splitext(input_path)
             source_path = f"{name}_bilingual.epub"
             if os.path.exists(source_path):
-                target_path = os.path.join(self.translated_dir, f"{os.path.basename(input_path)}_bilingual.epub")
+                target_path = os.path.join(self.translated_dir, f"{book_id}_bilingual.epub")
                 os.rename(source_path, target_path)
                 return
             raise HTTPException(500, "Translation process terminated without output file")
